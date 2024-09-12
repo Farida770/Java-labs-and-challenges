@@ -1,3 +1,8 @@
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,6 +26,46 @@ public class Formulas_Tests {
     public void setup()
     {
 
+    }
+
+    @Test(timeout = 2000)
+    public void checkImports() throws Exception{
+        String className = "Formulas";
+        String fileName = "src/"+generateClassName(className).replaceAll("\\.","/")+".java";
+        boolean allowedOnly = true;
+        ArrayList<String> invalidImport = new ArrayList<>();
+        try
+        {
+
+            File file = new File(fileName);
+            Scanner fromFile = new Scanner(file);
+            while(fromFile.hasNextLine())
+            {
+                String line = fromFile.nextLine().trim();
+                if(line.contains("import"))
+                {
+                    boolean good = false;
+                    for(String allowed: allowedImports)
+                    {
+                        if(line.matches("\\s*import\\s+"+allowed+"\\s*;\s*(//\\.*)?"))
+                            good=true;
+                    }
+                    if(!good)
+                    {
+                        allowedOnly=false;
+                        invalidImport.add(line);
+                    }
+                }
+
+            }
+        }
+        catch(Exception e)
+        {
+            Assert.assertTrue("Missing File: "+className+".java",false);
+            allowedOnly = false;
+        }
+
+        Assert.assertTrue("Invalid imports: "+invalidImport,allowedOnly);
     }
 
     @Test(timeout = 2000)
